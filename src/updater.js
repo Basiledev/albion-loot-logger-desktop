@@ -63,17 +63,24 @@ async function updateExe(release, latestVersion) {
     const newExePath = path.join(exeDir, '.update-new.exe')
     await downloadFile(asset.browser_download_url, newExePath)
 
+    // Le fichier reste souvent verrouille bien plus de quelques secondes apres la sortie
+    // du process (Windows Defender scanne le .exe fraichement telecharge, non signe) —
+    // fenetre de retry large (jusqu'a ~2 minutes) pour laisser passer ca sans echouer.
+    // Unblock-File retire aussi le flag "provient d'internet" (evite l'avertissement
+    // SmartScreen au lancement automatique).
     const helperPath = path.join(os.tmpdir(), `albion-loot-logger-update-${Date.now()}.ps1`)
     const helperScript = [
         `$targetPid = ${process.pid}`,
         `try { Wait-Process -Id $targetPid -Timeout 30 -ErrorAction SilentlyContinue } catch {}`,
-        `for ($i = 0; $i -lt 20; $i++) {`,
+        `try { Unblock-File -Path '${newExePath}' -ErrorAction SilentlyContinue } catch {}`,
+        `for ($i = 0; $i -lt 80; $i++) {`,
         `    try {`,
         `        Move-Item -Force '${newExePath}' '${exePath}'`,
+        `        try { Unblock-File -Path '${exePath}' -ErrorAction SilentlyContinue } catch {}`,
         `        Start-Process '${exePath}'`,
         `        break`,
         `    } catch {`,
-        `        Start-Sleep -Milliseconds 500`,
+        `        Start-Sleep -Milliseconds 1500`,
         `    }`,
         `}`,
         `Remove-Item -Force '${helperPath}' -ErrorAction SilentlyContinue`,
