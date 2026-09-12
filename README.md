@@ -12,47 +12,42 @@ Project, radars, etc.).
 
 ## Prérequis
 
-1. **Node.js** v18 ou plus récent.
-2. **Npcap** — [télécharger ici](https://npcap.com/#download), cocher **"Install Npcap in
-   WinPcap API-compatible Mode"** pendant l'installation.
-3. **Windows uniquement pour l'instant** (Linux possible avec `libpcap-dev`, non testé).
-4. **Visual Studio Build Tools** (workload "Développement Desktop en C++") — nécessaire
-   une seule fois pour compiler le module de capture réseau lors du premier `npm install` :
-   ```
-   winget install --id Microsoft.VisualStudio.2022.BuildTools --override "--wait --passive --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
-   ```
+1. **Npcap** — [télécharger ici](https://npcap.com/#download), cocher **"Install Npcap in
+   WinPcap API-compatible Mode"** pendant l'installation. C'est le seul logiciel à installer
+   (pilote de capture réseau, utilisé par plein d'autres outils Albion comme les radars).
+2. **Windows uniquement pour l'instant** (Linux possible avec `libpcap-dev`, non testé).
+
+Rien d'autre : pas de Node.js, pas de Build Tools, pas d'`npm install` à faire.
 
 ## Installation
 
-**Pour un membre de la guilde** : télécharge le dernier zip depuis
-[Releases](https://github.com/Basiledev/albion-loot-logger-desktop/releases/latest),
-extrais-le où tu veux, pas besoin de Node.js ni des Build Tools (déjà inclus dans le zip).
+**Pour un membre de la guilde** : télécharge le fichier `.exe` (ex: `AlbionLootLogger-v0.2.0.exe`)
+depuis [Releases](https://github.com/Basiledev/albion-loot-logger-desktop/releases/latest)
+(section "Assets" en bas de la page) et lance-le directement — aucune installation.
 
-**Pour développer/tester en local** :
+**Pour développer/tester en local** (uniquement si tu modifies le code) :
 ```
 npm install
+npm start
 ```
 
 ## Mise à jour automatique
 
 Au démarrage, le logiciel vérifie s'il existe une version plus récente sur
 [Releases](https://github.com/Basiledev/albion-loot-logger-desktop/releases). Si oui, il la
-télécharge, l'installe dans un dossier voisin et se relance automatiquement dessus — rien à
-faire manuellement. Cette vérification est silencieuse en cas d'échec (pas de connexion,
-GitHub indisponible...) : le logiciel continue avec la version actuelle.
+télécharge et se relance automatiquement avec la nouvelle version — rien à faire
+manuellement (double-cliquer le `.exe` une seule fois suffit, il se met à jour tout seul par
+la suite). Cette vérification est silencieuse en cas d'échec (pas de connexion, GitHub
+indisponible...) : le logiciel continue avec la version actuelle.
 
 ## Utilisation
 
 1. Dans Discord, dans le fil de l'activité : `/loottrack start` → récupère le code affiché.
-2. Lance le logiciel (**en Administrateur**, requis pour la capture réseau) :
-   ```
-   npm start
-   ```
-   Pour tester contre un site lancé en local (`cd web && npm run dev`), copie `.env.example`
-   en `.env` (garde `BACKEND_URL=http://localhost:3000`) et lance plutôt :
-   ```
-   npm run dev
-   ```
+2. Lance `AlbionLootLogger.exe` (**clic droit → "Exécuter en tant qu'administrateur"**,
+   requis pour la capture réseau).
+   Pour tester contre un site lancé en local (`cd web && npm run dev`) en mode dev, copie
+   `.env.example` en `.env` (garde `BACKEND_URL=http://localhost:3000`) et lance plutôt
+   `npm run dev`.
 3. Colle le code de session quand demandé.
 4. Lance Albion Online si ce n'est pas déjà fait — le logiciel détecte ton personnage
    automatiquement (pas besoin de retaper ton pseudo).
@@ -82,13 +77,20 @@ de couverture si le groupe est dispersé), le site fusionne tout.
 ## Publier une mise à jour (maintainer)
 
 1. Bump la version dans `package.json`.
-2. `npm run package-release` → génère `albion-loot-logger-desktop-vX.Y.Z.zip` à la racine.
+2. `npm run package-release` → génère dans `dist/` :
+   - `AlbionLootLogger-vX.Y.Z.exe` (exécutable standalone, via [pkg](https://github.com/yao-pkg/pkg)) — c'est celui que les membres de la guilde téléchargent.
+   - `albion-loot-logger-desktop-vX.Y.Z.zip` (source, pour mon usage dev).
 3. `git push`, puis :
    ```
-   gh release create vX.Y.Z albion-loot-logger-desktop-vX.Y.Z.zip --title "vX.Y.Z" --notes "..."
+   gh release create vX.Y.Z dist/AlbionLootLogger-vX.Y.Z.exe dist/albion-loot-logger-desktop-vX.Y.Z.zip --title "vX.Y.Z" --notes "..."
    ```
-   Le tag (`vX.Y.Z`) doit correspondre exactement à la version du zip — c'est ce que
-   l'auto-update compare (`src/updater.js`).
+   Le tag (`vX.Y.Z`) doit correspondre exactement à la version buildée — c'est ce que
+   l'auto-update compare (`src/updater.js`). L'auto-update télécharge l'asset se terminant
+   par `.exe` (utilisateurs finaux) ou `.zip` (dev), selon comment le logiciel tourne.
+
+   **Important** : le `.exe` doit être buildé avec la même version majeure de Node.js que
+   celle utilisée pour `npm install` (le module natif `cap` doit matcher l'ABI cible dans
+   `package.json` → `pkg.targets`, sinon erreur `NODE_MODULE_VERSION` au lancement).
 
 ## Licence
 

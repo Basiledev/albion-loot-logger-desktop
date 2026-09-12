@@ -3,3 +3,5 @@ node_modules/
 *.log
 debug-logs.txt*
 *.zip
+*.exe
+dist/
