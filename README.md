@@ -92,6 +92,14 @@ de couverture si le groupe est dispersé), le site fusionne tout.
    celle utilisée pour `npm install` (le module natif `cap` doit matcher l'ABI cible dans
    `package.json` → `pkg.targets`, sinon erreur `NODE_MODULE_VERSION` au lancement).
 
+   L'icône (`build-assets/icon-source.png`) est appliquée par `scripts/build-exe.js` —
+   pkg n'a pas d'option native pour ça, et les outils habituels (rcedit, Resource
+   Hacker...) corrompent le payload que pkg ajoute à la fin du binaire. Le script
+   utilise `pe-library`/`resedit` (qui préserve le fichier octet pour octet) pour poser
+   l'icône sur le binaire de base *avant* que pkg n'y injecte l'appli. Pour changer
+   l'icône : remplace `build-assets/icon-source.png` (PNG carré, 512×512 recommandé) et
+   supprime `build-assets/icon.ico` s'il existe (régénéré automatiquement).
+
 ## Licence
 
 GPL-3.0 — voir `LICENSE` et `NOTICE.md` (attribution à ao-loot-logger).

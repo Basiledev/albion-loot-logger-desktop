@@ -16,9 +16,9 @@ try {
     New-Item -ItemType Directory -Path $distDir | Out-Null
 
     $exePath = Join-Path $distDir "AlbionLootLogger-v$version.exe"
-    Write-Output "Build de l'executable ($exePath)..."
-    npx pkg . -o $exePath
-    if ($LASTEXITCODE -ne 0) { throw "pkg a echoue" }
+    Write-Output "Build de l'executable avec icone ($exePath)..."
+    node scripts/build-exe.js $exePath
+    if ($LASTEXITCODE -ne 0) { throw "build-exe.js a echoue" }
 
     $stagingDir = Join-Path $env:TEMP "albion-loot-logger-desktop-v$version"
     $zipPath = Join-Path $distDir "albion-loot-logger-desktop-v$version.zip"
