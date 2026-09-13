@@ -63,19 +63,20 @@ async function updateExe(release, latestVersion) {
     const newExePath = path.join(exeDir, '.update-new.exe')
     await downloadFile(asset.browser_download_url, newExePath)
 
-    // Le fichier reste parfois verrouille tres largement plus que quelques secondes apres
-    // la sortie du process (Windows Defender scanne le .exe fraichement telecharge, non
-    // signe — teste en conditions reelles : resolu en ~1min30 une fois, encore verrouille
-    // apres 2min une autre fois, puis debloque quelques minutes plus tard) — fenetre de
-    // retry large (jusqu'a ~6 minutes) pour laisser passer ca sans echouer. Unblock-File
-    // retire aussi le flag "provient d'internet" (evite l'avertissement SmartScreen au
-    // lancement automatique).
+    // Le fichier reste verrouille apres la sortie du process (Windows Defender scanne le
+    // .exe fraichement telecharge, non signe) pendant une duree tres variable selon la
+    // charge systeme au moment precis — teste en conditions reelles : instantane une fois,
+    // encore verrouille apres 6 minutes une autre fois puis debloque un instant plus tard.
+    // Fenetre de retry tres large (jusqu'a ~15 minutes) : un helper detache qui patiente en
+    // arriere-plan ne coute rien a l'utilisateur, mieux vaut ca qu'un echec silencieux qui
+    // retombe sur l'ancienne version. Unblock-File retire aussi le flag "provient
+    // d'internet" (evite l'avertissement SmartScreen au lancement automatique).
     const helperPath = path.join(os.tmpdir(), `albion-loot-logger-update-${Date.now()}.ps1`)
     const helperScript = [
         `$targetPid = ${process.pid}`,
         `try { Wait-Process -Id $targetPid -Timeout 30 -ErrorAction SilentlyContinue } catch {}`,
         `try { Unblock-File -Path '${newExePath}' -ErrorAction SilentlyContinue } catch {}`,
-        `for ($i = 0; $i -lt 120; $i++) {`,
+        `for ($i = 0; $i -lt 300; $i++) {`,
         `    try {`,
         `        Move-Item -Force '${newExePath}' '${exePath}'`,
         `        try { Unblock-File -Path '${exePath}' -ErrorAction SilentlyContinue } catch {}`,
