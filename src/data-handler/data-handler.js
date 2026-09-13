@@ -31,12 +31,26 @@ function openDiscoveryWindow() {
     console.info(`[DISCOVER] Fenêtre ouverte pour ${Config.DISCOVER_WINDOW_MS / 1000}s — fais ton action maintenant.`)
 }
 
+// Affiche la vraie valeur (pas seulement le type) — utile pour distinguer par ex. un
+// tableau de bytes vide/à zéro (GUID vide) d'un tableau non vide, ce que `typeof` seul ne
+// permet pas de voir. Tronqué pour ne pas noyer la console sur les gros tableaux/objets.
+function formatDiscoverValue(v) {
+    if (typeof v === 'string') return `"${v}"`
+    if (Array.isArray(v)) {
+        return v.length > 32 ? `array(${v.length})[${v.slice(0, 32).join(',')},...]` : `[${v.join(',')}]`
+    }
+    if (v && typeof v === 'object') {
+        try { return JSON.stringify(v).slice(0, 200) } catch { return typeof v }
+    }
+    return String(v)
+}
+
 function discover(source, eventId, parameters) {
     if (process.env.DISCOVER !== '1') return
     const windowActive = Date.now() < discoveryWindowUntil
     if (!windowActive && seenDiscoveryIds.has(`${source}:${eventId}`)) return
     seenDiscoveryIds.add(`${source}:${eventId}`)
-    const shape = Object.fromEntries(Object.entries(parameters).map(([k, v]) => [k, typeof v === 'string' ? `"${v}"` : typeof v]))
+    const shape = Object.fromEntries(Object.entries(parameters).map(([k, v]) => [k, formatDiscoverValue(v)]))
     const time = new Date().toLocaleTimeString()
     console.info(`[DISCOVER ${time}]${windowActive ? ' [FENETRE]' : ''} ${source} id=${eventId} params=${JSON.stringify(shape)}`)
 }
