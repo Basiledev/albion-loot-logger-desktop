@@ -21,9 +21,12 @@ Rien d'autre : pas de Node.js, pas de Build Tools, pas d'`npm install` à faire.
 
 ## Installation
 
-**Pour un membre de la guilde** : télécharge le fichier `.exe` (ex: `AlbionLootLogger-v0.2.0.exe`)
+**Pour un membre de la guilde** : télécharge `AlbionLootLogger.exe`
 depuis [Releases](https://github.com/Basiledev/albion-loot-logger-desktop/releases/latest)
 (section "Assets" en bas de la page) et lance-le directement — aucune installation.
+Garde ce fichier où tu veux (Bureau, Téléchargements...) : les mises à jour automatiques
+le remplacent sur place, à ce même emplacement, à chaque lancement — pas besoin de le
+re-télécharger manuellement, et le nom du fichier ne change jamais.
 
 **Pour développer/tester en local** (uniquement si tu modifies le code) :
 ```
@@ -78,11 +81,11 @@ de couverture si le groupe est dispersé), le site fusionne tout.
 
 1. Bump la version dans `package.json`.
 2. `npm run package-release` → génère dans `dist/` :
-   - `AlbionLootLogger-vX.Y.Z.exe` (exécutable standalone, via [pkg](https://github.com/yao-pkg/pkg)) — c'est celui que les membres de la guilde téléchargent.
+   - `AlbionLootLogger.exe` (exécutable standalone, via [pkg](https://github.com/yao-pkg/pkg)) — nom stable (jamais versionné), c'est celui que les membres de la guilde téléchargent et que l'auto-update remplace en place à chaque nouvelle version.
    - `albion-loot-logger-desktop-vX.Y.Z.zip` (source, pour mon usage dev).
 3. `git push`, puis :
    ```
-   gh release create vX.Y.Z dist/AlbionLootLogger-vX.Y.Z.exe dist/albion-loot-logger-desktop-vX.Y.Z.zip --title "vX.Y.Z" --notes "..."
+   gh release create vX.Y.Z dist/AlbionLootLogger.exe dist/albion-loot-logger-desktop-vX.Y.Z.zip --title "vX.Y.Z" --notes "..."
    ```
    Le tag (`vX.Y.Z`) doit correspondre exactement à la version buildée — c'est ce que
    l'auto-update compare (`src/updater.js`). L'auto-update télécharge l'asset se terminant

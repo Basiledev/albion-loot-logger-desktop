@@ -1,6 +1,9 @@
 # Package le logiciel pour une release GitHub. Deux artefacts :
-# - AlbionLootLogger-vX.Y.Z.exe : executable standalone (pkg), aucune installation
-#   requise, c'est celui-ci que les membres de la guilde telechargent.
+# - AlbionLootLogger.exe : executable standalone (pkg), aucune installation requise,
+#   c'est celui-ci que les membres de la guilde telechargent. Nom STABLE (jamais
+#   versionne) expres : l'auto-update remplace le fichier en place, a son propre chemin
+#   (voir updater.js) — un nom versionne aurait laisse le fichier local fige au nom de la
+#   version du tout premier telechargement, meme apres plusieurs mises a jour reussies.
 # - albion-loot-logger-desktop-vX.Y.Z.zip : source + node_modules deja compile, pour
 #   mon usage dev (npm start) uniquement.
 $ErrorActionPreference = "Stop"
@@ -15,7 +18,7 @@ try {
     if (Test-Path $distDir) { Remove-Item $distDir -Recurse -Force }
     New-Item -ItemType Directory -Path $distDir | Out-Null
 
-    $exePath = Join-Path $distDir "AlbionLootLogger-v$version.exe"
+    $exePath = Join-Path $distDir "AlbionLootLogger.exe"
     Write-Output "Build de l'executable avec icone ($exePath)..."
     node scripts/build-exe.js $exePath
     if ($LASTEXITCODE -ne 0) { throw "build-exe.js a echoue" }
