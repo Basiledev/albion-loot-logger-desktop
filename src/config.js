@@ -22,7 +22,10 @@ const EVENTS = {
     // L'item référencé par ObjectId rejoint l'inventaire du joueur LOCAL — c'est le vrai
     // signal "j'ai ramassé quelque chose", mais sans dire quoi (juste l'ObjectId) : il faut
     // le corréler avec l'event "New*Item" ci-dessus qui a créé cet ObjectId.
-    EvInventoryPutItem: 26,
+    // ATTENTION : ce n'est PAS le code 26 (qui se déclenche pour équiper/déséquiper une
+    // pièce — cause des faux positifs "équiper = loot" avant ce fix). Confirmé par capture
+    // DISCOVER réelle d'un vrai ramassage au sol (2026-09) : le code exact est 27.
+    EvInventoryPutItem: 27,
     OpJoin: 2, // arrivée dans une nouvelle zone/room Photon = changement de map
 }
 
