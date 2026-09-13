@@ -1,6 +1,6 @@
 {
   "name": "albion-loot-logger-desktop",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "Logiciel de tracking de loot pour la guilde — capture reseau (fork d'ao-loot-logger, GPL-3.0), envoie les events a un backend web pour comparaison avec le contenu du coffre.",
   "main": "src/index.js",
   "bin": "src/index.js",

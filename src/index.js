@@ -6,10 +6,12 @@ process.on('unhandledRejection', (reason) => {
     console.error(reason)
 })
 
+const os = require('os')
 const readline = require('readline')
 
 const { version } = require('../package.json')
 const Updater = require('./updater')
+const ConsoleBuffer = require('./utils/console-buffer')
 
 const CTRL_C = String.fromCharCode(3)
 
@@ -17,6 +19,15 @@ main()
 
 async function main() {
     console.info(`Albion Loot Logger (guild) - v${version}\n`)
+
+    // Priorité process abaissée : filet de sécurité pour qu'en cas de pic (gros burst de
+    // loot), l'OS favorise toujours Albion plutôt que ce logiciel s'ils se disputent le CPU.
+    try {
+        os.setPriority(process.pid, os.constants.priority.PRIORITY_BELOW_NORMAL)
+    } catch (error) {
+        // Pas bloquant (ex: droits insuffisants sur certaines configs) — le logiciel
+        // tourne simplement à priorité normale.
+    }
 
     // Vérifié AVANT de charger le module de capture réseau (cap) : celui-ci verrouille
     // son .node natif une fois chargé, ce qui empêcherait un self-update propre.
@@ -52,14 +63,17 @@ async function main() {
 
     // Seuls ces deux events s'affichent en direct — tout le reste (paquets réseau, detail
     // interne) va dans debug-logs.txt (voir utils/logger.js) pour ne pas noyer l'utile.
+    // Passe par ConsoleBuffer (écritures groupées) plutôt que console.info direct : même
+    // affichage, une ligne par event, mais sans bloquer le thread JS event par event lors
+    // d'un burst (ex: gros loot d'un coffre) — voir utils/console-buffer.js.
     Reporter.onEvent = (ev) => {
         if (ev.type === 'loot') {
-            console.info(`  ${cyan('loot')}  ${ev.ingameName} x${ev.quantity} ${ev.itemType}${ev.lootedFrom ? ` (sur ${ev.lootedFrom})` : ''}`)
+            ConsoleBuffer.push(`  ${cyan('loot')}  ${ev.ingameName} x${ev.quantity} ${ev.itemType}${ev.lootedFrom ? ` (sur ${ev.lootedFrom})` : ''}`)
         } else if (ev.type === 'zone_change') {
             if (ev.isCity) {
-                console.info(`  ${yellow('-> marque comme "en ville" (loot considere depose)')}`)
+                ConsoleBuffer.push(`  ${yellow('-> marque comme "en ville" (loot considere depose)')}`)
             } else {
-                console.info(`  ${yellow('-> changement de map detecte')}`)
+                ConsoleBuffer.push(`  ${yellow('-> changement de map detecte')}`)
             }
         }
     }
