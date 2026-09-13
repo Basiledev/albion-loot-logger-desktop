@@ -40,6 +40,12 @@ class Config {
         this.BACKEND_URL = process.env.BACKEND_URL || 'https://pfmanager.vercel.app'
         this.REPORT_INTERVAL_MS = 4000
         this.MAX_QUEUE_SIZE = 500 // au-delà, on jette les events les plus vieux (backend injoignable trop longtemps)
+
+        // Un vrai ramassage a toujours un EvNewItem (l'item apparaît) tout récent avant
+        // l'EvInventoryPutItem (tu le prends) — équiper/déséquiper ou déposer dans un coffre
+        // n'en ont aucun à proximité (voir storage/item-entities-storage.js). Fenêtre large
+        // pour couvrir le cas où tu mets du temps à looter après avoir ouvert un coffre.
+        this.LOOT_FRESHNESS_WINDOW_MS = 20_000
     }
 }
 
