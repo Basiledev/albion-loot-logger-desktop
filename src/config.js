@@ -44,14 +44,13 @@ class Config {
         this.REPORT_INTERVAL_MS = 4000
         this.MAX_QUEUE_SIZE = 500 // au-delà, on jette les events les plus vieux (backend injoignable trop longtemps)
 
-        // Un vrai ramassage a toujours un EvNewItem (l'item apparaît) tout récent avant
-        // l'EvInventoryPutItem (tu le prends) — équiper/déséquiper ou déposer dans un coffre
-        // n'en ont aucun à proximité (voir storage/item-entities-storage.js). Fenêtre
-        // COURTE exprès (une première tentative à 20s laissait encore passer des
-        // ré-équipements faits peu après le vrai ramassage — cas observé en conditions
-        // réelles, 2026-09) : un vrai ramassage arrive quasi instantanément après l'item qui
-        // apparaît (même clic), inutile de couvrir un délai de plusieurs secondes.
-        this.LOOT_FRESHNESS_WINDOW_MS = 3_000
+        // Garde-fou secondaire : l'EvNewItem doit dater de moins de cette durée. Depuis le fix
+        // du bon code d'event (27), équiper/déséquiper ne passe plus par ici, donc la
+        // fenêtre n'a plus à être serrée. Elle l'était à 3s et bloquait le loot des
+        // cadavres : les items apparaissent à l'OUVERTURE du cadavre, et le joueur les prend
+        // plusieurs secondes plus tard. La consommation unique par ObjectId (voir
+        // storage/item-entities-storage.js) reste le filtre anti-doublon.
+        this.LOOT_FRESHNESS_WINDOW_MS = 300_000
     }
 }
 
